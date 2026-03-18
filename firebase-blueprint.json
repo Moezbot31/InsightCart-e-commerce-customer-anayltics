@@ -1,0 +1,102 @@
+{
+  "entities": {
+    "CustomerSegment": {
+      "title": "Customer Segment",
+      "description": "A group of customers identified by clustering analysis.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique segment ID" },
+        "name": { "type": "string", "description": "Human-readable name (e.g., Champions, At Risk)" },
+        "description": { "type": "string", "description": "Detailed description of the segment" },
+        "count": { "type": "number", "description": "Number of customers in this segment" },
+        "avgRecency": { "type": "number", "description": "Average days since last purchase" },
+        "avgFrequency": { "type": "number", "description": "Average number of purchases" },
+        "avgMonetary": { "type": "number", "description": "Average total spend" },
+        "color": { "type": "string", "description": "Hex color for visualization" }
+      },
+      "required": ["id", "name", "count"]
+    },
+    "AnalysisResult": {
+      "title": "Analysis Result",
+      "description": "The outcome of a specific segmentation run.",
+      "type": "object",
+      "properties": {
+        "timestamp": { "type": "string", "format": "date-time" },
+        "totalCustomers": { "type": "number" },
+        "totalRevenue": { "type": "number" },
+        "segments": { "type": "array", "items": { "$ref": "CustomerSegment" } },
+        "aiInsights": { "type": "string", "description": "Gemini-generated insights" }
+      },
+      "required": ["timestamp", "totalCustomers", "segments"]
+    },
+    "User": {
+      "title": "User",
+      "description": "Application user with role-based access and profile information.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "organization": { "type": "string", "description": "The company or group the user belongs to." },
+        "role": { "type": "string", "enum": ["analyst", "executive"] },
+        "lastLogin": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "dashboardPreferences": {
+          "type": "object",
+          "properties": {
+            "theme": { "type": "string", "enum": ["light", "dark"] },
+            "compactMode": { "type": "boolean" }
+          }
+        }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "DashboardWidget": {
+      "title": "Dashboard Widget",
+      "description": "A single visualization widget in a custom dashboard.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string", "enum": ["bar", "line", "pie", "scatter", "stat"] },
+        "title": { "type": "string" },
+        "dataSource": { "type": "string", "description": "Key in analysis object" },
+        "layout": { 
+          "type": "object",
+          "properties": {
+            "x": { "type": "number" },
+            "y": { "type": "number" },
+            "w": { "type": "number" },
+            "h": { "type": "number" }
+          }
+        }
+      }
+    },
+    "CustomDashboard": {
+      "title": "Custom Dashboard",
+      "description": "A user-created dashboard layout.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "createdBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "widgets": { "type": "array", "items": { "$ref": "DashboardWidget" } }
+      },
+      "required": ["id", "name", "createdBy", "widgets"]
+    }
+  },
+  "firestore": {
+    "/analyses": {
+      "schema": "AnalysisResult",
+      "description": "History of segmentation analyses performed by users."
+    },
+    "/users": {
+      "schema": "User",
+      "description": "User profiles and roles."
+    },
+    "/dashboards": {
+      "schema": "CustomDashboard",
+      "description": "Custom dashboards created by analysts."
+    }
+  }
+}
